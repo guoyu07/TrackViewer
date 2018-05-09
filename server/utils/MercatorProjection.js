@@ -20,7 +20,7 @@ class MercatorProjection {
      * @return longitude in meters in spherical mercator projection
      */
     longitudeToMetersX(longitude) {
-        return this.WGS84.EQUATORIALRADIUS * ((Math.PI * longitude)/ 180);
+        return this.WGS84.EQUATORIALRADIUS * ((Math.PI * longitude) / 180);
     }
 
     /**
@@ -31,7 +31,7 @@ class MercatorProjection {
      * @return longitude in degrees in spherical mercator projection
      */
     metersXToLongitude(x) {
-        return (180 * x) / (Math.PI * this.WGS84.EQUATORIALRADIUS)
+        return (180 * x) / (Math.PI * this.WGS84.EQUATORIALRADIUS);
     }
 
     /**
@@ -42,7 +42,7 @@ class MercatorProjection {
      * @return latitude in degrees in spherical mercator projection
      */
     metersYToLatitude(y) {
-        return (180 / Math.PI) * Math.atan(Math.sinh(y / this.WGS84.EQUATORIALRADIUS))
+        return (180 / Math.PI) * Math.atan(Math.sinh(y / this.WGS84.EQUATORIALRADIUS));
     }
 
     /**
@@ -148,9 +148,9 @@ class MercatorProjection {
 
     pixelXToLongitudeWithMod(x, pixelX, zoom) {
         // 获取左下角X像素坐标
-        let pixXMin = tileXToPixelX(x);
+        let pixXMin = this.tileXToPixelX(x);
 
-        pixXMin = pixXMin + pixelX;
+        pixXMin += pixelX;
 
         return this.pixelXToLongitude(pixXMin, zoom);
     }
@@ -165,7 +165,7 @@ class MercatorProjection {
      * @return the tile X number.
      */
     pixelXToTileX(pixelX, zoom) {
-        return  Math.min(Math.max(pixelX / this.TileSize, 0), Math.pow(2, zoom) - 1);
+        return Math.min(Math.max(pixelX / this.TileSize, 0), Math.pow(2, zoom) - 1);
     }
 
     /**
@@ -189,6 +189,7 @@ class MercatorProjection {
     tileYToPixelY(tileY) {
         return tileY * this.TileSize;
     }
+
     /**
      * Convert a pixel Y coordinate at a certain zoom level to a latitude
      * coordinate.
@@ -208,7 +209,7 @@ class MercatorProjection {
         // 获取左下角Y像素坐标
         let pixYMin = this.tileYToPixelY(y);
 
-        pixYMin = pixYMin + pixelY;
+        pixYMin += pixelY;
 
         return this.pixelYToLatitude(pixYMin, zoom);
     }
@@ -223,8 +224,7 @@ class MercatorProjection {
      * @return the tile Y number.
      */
     pixelYToTileY(pixelY, zoom) {
-        return Math.min(Math.max(pixelY / this.TileSize, 0),
-            Math.pow(2, zoom) - 1);
+        return Math.min(Math.max(pixelY / this.TileSize, 0), Math.pow(2, zoom) - 1);
     }
 
     /**
@@ -291,7 +291,7 @@ class MercatorProjection {
 
         const minLonY = this.tileYToLatitude(tileY + 1, zoom);
 
-        return [minLonX, minLonY, maxLonX, maxLonY ];
+        return [minLonX, minLonY, maxLonX, maxLonY];
     }
 
     /**
@@ -305,47 +305,47 @@ class MercatorProjection {
     tile2Wkt(tileX, tileY, zoom) {
         const bounds = this.tileBounds(tileX, tileY, zoom);
 
-        let sb = "POLYGON((";
+        let sb = 'POLYGON((';
 
         sb += bounds[0];
 
-        sb += " ";
+        sb += ' ';
 
         sb += bounds[1];
 
-        sb += ",";
+        sb += ',';
 
         sb += bounds[2];
 
-        sb += " ";
+        sb += ' ';
 
         sb += bounds[1];
 
-        sb += ",";
+        sb += ',';
 
         sb += bounds[2];
 
-        sb += " ";
+        sb += ' ';
 
         sb += bounds[3];
 
-        sb += ",";
+        sb += ',';
 
         sb += bounds[0];
 
-        sb += " ";
+        sb += ' ';
 
         sb += bounds[3];
 
-        sb += ",";
+        sb += ',';
 
         sb += bounds[0];
 
-        sb += " ";
+        sb += ' ';
 
         sb += bounds[1];
 
-        sb += "))";
+        sb += '))';
 
         return sb;
     }
@@ -357,101 +357,103 @@ class MercatorProjection {
     }
 
     getWktWithGap(x, y, z, gap) {
-        let sb = "POLYGON ((";
+        let sb = 'POLYGON ((';
 
         // 获取左下角X像素坐标
         let pixXMin = this.tileXToPixelX(x);
 
-        pixXMin = pixXMin - gap;
+        pixXMin -= gap;
 
         const lngMin = this.pixelXToLongitude(pixXMin, z);
 
         // 获取左下角
-        let pixYMin = this.tileYToPixelY(y+1);
+        let pixYMin = this.tileYToPixelY(y + 1);
 
-        pixYMin = pixYMin + gap;
+        pixYMin += gap;
 
         const latMin = this.pixelYToLatitude(pixYMin, z);
 
         // 获取右上角X像素坐标
         let pixXMax = this.tileXToPixelX(x + 1);
 
-        pixXMax = pixXMax + gap;
+        pixXMax += gap;
 
         const lngMax = this.pixelXToLongitude(pixXMax, z);
 
         // 获取右上角
         let pixYMax = this.tileYToPixelY(y);
 
-        pixYMax = pixYMax - gap;
+        pixYMax -= gap;
 
         const latMax = this.pixelYToLatitude(pixYMax, z);
 
         sb += lngMin;
 
-        sb += " ";
+        sb += ' ';
 
         sb += latMin;
 
-        sb += ",";
+        sb += ',';
 
         sb += lngMax;
 
-        sb += " ";
+        sb += ' ';
 
         sb += latMin;
 
-        sb += ",";
+        sb += ',';
 
         sb += lngMax;
 
-        sb += " ";
+        sb += ' ';
 
         sb += latMax;
 
-        sb += ",";
+        sb += ',';
 
         sb += lngMin;
 
-        sb += " ";
+        sb += ' ';
 
         sb += latMax;
 
-        sb += ",";
+        sb += ',';
 
         sb += lngMin;
 
-        sb += " ";
+        sb += ' ';
 
         sb += latMin;
 
-        sb += "))";
+        sb += '))';
 
         return sb.toString();
     }
 
-    coord2Pixel(wkt, x, y, z){
-        let coords =[];
+    coord2Pixel(wkt, x, y, z) {
+        let coords = [];
         const geometry = wktParser.parse(wkt);
-        if(geometry) {
-            switch(geometry.type) {
-                case "Point":
+        if (geometry) {
+            switch (geometry.type) {
+                case 'Point':
                     coords = (this.lonlat2Pixel(geometry.coordinates[0], geometry.coordinates[1], z, x, y));
                     break;
-                case "LineString":
-                    for (let i=0; i< geometry.coordinates.length; i++){
+                case 'LineString':
+                    for (let i = 0; i < geometry.coordinates.length; i++) {
                         coords.push(this.lonlat2Pixel(geometry.coordinates[i][0], geometry.coordinates[i][1], z, x, y));
                     }
                     break;
-                case "Polygon":
-                case "MultiLineString":
-                    for (let i=0; i< geometry.coordinates.length; i++){
+                case 'Polygon':
+                case 'MultiLineString':
+                    for (let i = 0; i < geometry.coordinates.length; i++) {
                         let singleCoords = [];
-                        for (let j=0; j<geometry.coordinates[i].length; j++){
+                        for (let j = 0; j < geometry.coordinates[i].length; j++) {
                             singleCoords.push(this.lonlat2Pixel(geometry.coordinates[i][j][0], geometry.coordinates[i][j][1], z, x, y));
                         }
                         coords.push(singleCoords);
                     }
+                    break;
+                default:
                     break;
             }
         }

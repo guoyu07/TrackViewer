@@ -4,6 +4,12 @@ var Business = require('../server/controller/business/Business.js');
 var express = require('express');
 var needle = require('needle');
 var conf = require('../config/config.js');
+var path = require('path');
+var fs = require('fs');
+var logger = require('../log4js').logger;
+
+var router = express.Router();
+
 
 // import FilePathResolve from '../server/utils/FilePathResolve';
 // import ResJson from '../server/utils/ResJson';
@@ -12,16 +18,10 @@ var conf = require('../config/config.js');
 // import needle from 'needle';
 // import conf from '../config/config';
 
-var path = require('path');
-var fs = require('fs');
-var logger = require('../log4js').logger;
-var router = express.Router();
-
-
 /**
  * 获取点信息
  */
-router.get('/queryNodeDetail', function(req, res, next) {
+router.get('/queryNodeDetail', function (req, res, next) {
     try {
         let param = req.query.parameter;
         const {
@@ -66,7 +66,7 @@ router.get('/queryImage', function(req, res, next) {
  */
 router.get('/getPhotosByIndex', function(req, res, next) {
     try {
-        logger.info("咋没日志呢！");
+        logger.info('咋没日志呢！');
         let business = new Business(req, res);
         let parm = JSON.parse(req.query.parameter);
         let mode = parm.mode;
@@ -87,7 +87,7 @@ router.get('/list', function(req, res, next) {
         sourceArr.forEach(function (item, index, items) {
             item['type'] = '照片';
             list.push(item);
-        })
+        });
 
         const resJson = new ResJson();
         resJson.data = list;
@@ -113,7 +113,7 @@ router.post('/uploadImage', function (req, res, next) {
         
         const fileObjs = FilePathResolve.getInstance().getSourceArr();
         const fileObj = fileObjs[dirIndex];
-        const imagePath = path.join(fileObj.baseDir, image);     
+        const imagePath = path.join(fileObj.baseDir, image);
 
         const data = {
             parameter: JSON.stringify({
@@ -122,7 +122,7 @@ router.post('/uploadImage', function (req, res, next) {
                 pid: objectPid
             }),
             image: { file: imagePath, content_type: 'image/jpg' }
-        }
+        };
 
         needle.post(conf.uploadUrl + '?access_token=' + accessToken, data, { multipart: true }, function (err, resp, body) {
             res.json(resp.body);

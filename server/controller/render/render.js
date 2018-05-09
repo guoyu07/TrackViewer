@@ -9,7 +9,7 @@ var dateFormat = require('dateformat');
 
 var logger = require('../../../log4js').logger;
 
-var indes = 0;
+// var indes = 0;
 
 class SearchNode {
     constructor(req, res, next) {
@@ -19,8 +19,8 @@ class SearchNode {
     }
 
     getObjByTile() {
-        indes ++;
-        var indexs = indes;
+        // indes++;
+        // var indexs = indes;
         // logger.error(indexs + '进入：' + dateFormat(new Date(), 'yyyy-mm-dd hh:MM:ss l'));
         const self = this;
         const param = JSON.parse(this.req.query.parameter);
@@ -36,7 +36,7 @@ class SearchNode {
             json.errcode = -1;
             json.errmsg = err;
             self.res.json(json);
-        })
+        });
     }
 
     _createPromises(param) {
@@ -61,11 +61,11 @@ class SearchNode {
         const searchFactory = new SearchFactory();
         const search = searchFactory.createSearch(dirIndex, type);
         if (!search) {
-            return Promise.reject("没有找到对应的查询解析器!");
+            return Promise.reject('没有找到对应的查询解析器!');
         }
         return search.getByTileByMode(x, y, z, mode).catch(err => {
             logger.error(err);
-        })
+        });
     }
 }
 

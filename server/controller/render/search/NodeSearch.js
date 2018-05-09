@@ -6,14 +6,15 @@ var Search = require('./Search.js');
 // import ResJson from '../../../utils/ResJson';
 // import Search from "./Search";
 
-class SearchNode extends Search{
+class SearchNode extends Search {
+
     constructor(dirIndex, type) {
         super(dirIndex, type);
-
     }
+
     getByTileByMode(x, y, z, mode) {
         let self = this;
-        let  resJson = new ResJson();
+        let resJson = new ResJson();
         let trackTable = '';
         let photoTable = '';
         const wkt = MercatorProjection.getWktWithGap(x, y, z, 0);
@@ -39,7 +40,7 @@ class SearchNode extends Search{
 
         return this.executeSql(sql).then(rows => {
             let dataArray = [];
-            for(let i = 0; i < rows.length; i++){
+            for (let i = 0; i < rows.length; i++) {
                 if (rows[i].geometry) {
                     let snapShot = {
                         g: MercatorProjection.coord2Pixel(rows[i].geometry, px, py, z),
@@ -58,7 +59,5 @@ class SearchNode extends Search{
         });
     }
 }
-
-//export default SearchNode;
 
 module.exports = SearchNode;

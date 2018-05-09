@@ -18,8 +18,8 @@ class Search {
      * @param z
      * @param {String} mode 照片模式或者视频模式
      */
-    getByTileByMode(x, y, z, mode){
-
+    getByTileByMode(x, y, z, mode) {
+        throw new Error('子类必须重写getByTileByMode此方法!');
     }
 
     executeSql(sql) {
@@ -42,7 +42,7 @@ class Search {
             });
         }).catch(err => {
             logger.error(err);
-        })
+        });
     }
 }
 // export default Search;

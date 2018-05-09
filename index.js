@@ -1,3 +1,3 @@
 require('babel-register');
-require("babel-core").transform();
+require('babel-core').transform();
 require('./app.js');

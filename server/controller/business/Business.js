@@ -6,7 +6,6 @@ var FilePathResolve = require('../../utils/FilePathResolve.js');
 // import ResJson from '../../utils/ResJson';
 // import FilePathResolve from '../../utils/FilePathResolve';
 
-
 var logger = require('../../../log4js').logger;
 
 class Business {
@@ -45,18 +44,18 @@ class Business {
             let sql = `select a.id, AsGeoJSON(a.geometry) AS geometry, b.url,  b.shootTime
                     from  ${trackTable} a , ${photoTable} b where a.id = b.id order by a.recordTime `;
 
-            this.db.spatialite(function(e) {
+            this.db.spatialite(function (e) {
                 if (!e) {
                     self.db.all(sql, function(err, rows) {
                         if (!err) {
-                            var fileObjs = new FilePathResolve().getSourceArr();
+                            var fileObjs = FilePathResolve.getInstance().getSourceArr();
                             var fileObj = fileObjs[self.dirIndex];
                             var data = {
                                 node: rows,
                                 baesPath: fileObj.baseDir,
                                 flag: fileObj.flag,
                                 dirIndex: self.dirIndex
-                            }
+                            };
                             resJson.data = data;
                         } else {
                             logger.error(e);
@@ -69,11 +68,9 @@ class Business {
                     logger.error(e);
                     throw new Error(e);
                 }
-
             });
-
-        } catch (er){
-            logger.error(e);
+        } catch (er) {
+            logger.error(er);
             throw new Error(er);
         }
     }
@@ -108,7 +105,7 @@ class Business {
             wholeSql = ` select a.id, b.shootTime, AsGeoJSON(a.geometry) geometry, b.url, a.deviceNum from ${trackTable} a , ${photoTable} b where a.id = b.id order by a.recordTime  limit 2 `;
         }
 
-        this.db.spatialite(function(err) {
+        this.db.spatialite(function(er) {
             self.db.all(wholeSql, function(err, rows) {
                 if (!err) {
                     resJson.data = rows;

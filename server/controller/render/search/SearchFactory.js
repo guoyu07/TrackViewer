@@ -16,6 +16,9 @@ class SearchFactory {
                 break;
             case 'TRACKLINK':
                 search = new LinkSearch(dirIndex, type);
+                break;
+            default:
+                break;
         }
 
         return search;
