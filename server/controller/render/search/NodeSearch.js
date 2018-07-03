@@ -33,7 +33,7 @@ class SearchNode extends Search {
             // -------此处需要改善
         }
 
-        let sql = `select a.id as id, AsWKT(a.geometry) AS geometry from ${trackTable} a,  ${photoTable} b
+        let sql = `select a.id as id, a.isView, AsWKT(a.geometry) AS geometry from ${trackTable} a,  ${photoTable} b
                 where a.id = b.id and Contains(GeomFromText('${wkt}'), a.geometry)`;
         const px = MercatorProjection.tileXToPixelX(x);
         const py = MercatorProjection.tileYToPixelY(y);
@@ -49,6 +49,7 @@ class SearchNode extends Search {
                         m: {}
                     };
                     snapShot.m.a = rows[i].linkId;
+                    snapShot.m.a = rows[i].isView; // 轨迹点是否已经查看过
                     dataArray.push(snapShot);
                 }
             }

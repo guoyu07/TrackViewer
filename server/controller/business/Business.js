@@ -75,6 +75,12 @@ class Business {
         }
     }
 
+    /**
+     * 根据传入的值获取 当前点和前一个点以及后一个点。
+     * 如果是第一个点的时候id为空，需要单独处理
+     * @param {String} id 当前点的id
+     * @param {String} mode 照片模式还是视频模式
+     */
     getNodeDeatil(id, mode) {
         let trackTable = '';
         let photoTable = '';
@@ -90,9 +96,10 @@ class Business {
             resJson.errmsg = 'mode参数有误！';
             resJson.errcode = -1;
             self.res.json(resJson);
-
-            // -------此处需要改善
         }
+
+        // this.db.all(' update track_collection set isView = 0 ');
+
         // 返回 当前点和前一个点以及后一个点。
         let innerSql = `select aa.recordTime from ${trackTable} aa , ${photoTable} bb where aa.id = bb.id and aa.id = '${id}' `;
         let wholeSql = `select id, shootTime, geometry, '' as url, '' as deviceNum from (select a.id,  a.recordTime, b.shootTime, AsGeoJSON(a.geometry) geometry from ${trackTable} a , ${photoTable} b where a.id = b.id and a.recordTime < ( ${innerSql} ) order by a.recordTime desc limit 1 ) temp1  
@@ -109,6 +116,7 @@ class Business {
             self.db.all(wholeSql, function(err, rows) {
                 if (!err) {
                     resJson.data = rows;
+                    self.updatePointStatue(id, trackTable, rows); // 修改当前点的是否查看的状态
                 } else {
                     logger.error(err);
                     resJson.errmsg = err.message;
@@ -118,6 +126,20 @@ class Business {
             });
         });
 
+    }
+
+    /**
+     *
+     * @param {String} id 当前要参看的点
+     * @param {String} trackTable 要查看的表
+     * @param {Array} rows 查询的结果集
+     */
+    updatePointStatue(id, trackTable, rows) {
+        if (!id) {
+            id = rows[0].id;
+        }
+        let sql = `update ${trackTable} set isView = 1 where id = '${id}'`;
+        this.db.all(sql);
     }
 }
 
