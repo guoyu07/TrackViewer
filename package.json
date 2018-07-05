@@ -6,7 +6,7 @@
     "scripts": {
         "lint": "eslint routes config server --ext .js",
         "lint:fix": "npm run lint --fix",
-        "start-server": "nodemon index.js --exec babel-node",
+        "start": "nodemon index.js --exec babel-node",
         "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
         "serve": "node dist/index.js"
     },
