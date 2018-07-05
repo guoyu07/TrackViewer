@@ -49,7 +49,7 @@ class SearchNode extends Search {
                         m: {}
                     };
                     snapShot.m.a = rows[i].linkId;
-                    snapShot.m.v = rows[i].isView; // 轨迹点是否已经查看过
+                    snapShot.m.a = rows[i].isView; // 轨迹点是否已经查看过
                     dataArray.push(snapShot);
                 }
             }

@@ -24,7 +24,14 @@ class SearchNode {
         // logger.error(indexs + '进入：' + dateFormat(new Date(), 'yyyy-mm-dd hh:MM:ss l'));
         const self = this;
         const param = JSON.parse(this.req.query.parameter);
+        let dirIndex = param.dirIndex;
+        let mode = param.mode;
         let json = new ResJson();
+        if (!(dirIndex != undefined && dirIndex != null && mode)) {
+            json.data = { 'TRACKLINK': [], 'TRACKPOINT': []};
+            this.res.json(json);
+            return;
+        }
         const promises = this._createPromises(param);
         Promise.all(promises).then(res => {
             // logger.error(indexs + '退出：' + dateFormat(new Date(), 'yyyy-mm-dd hh:MM:ss  l'));
