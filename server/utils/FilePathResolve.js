@@ -91,10 +91,9 @@ class FilePathResolve {
         });
     }
 
-    createTempTables() {
+    async createTempTables() {
         for (let i = 0; i < this._sourceArr.length; i++) {
             let source = this._sourceArr[i];
-            // let sqlPath = source.sqlPath;
             let dirIndex = source.dirIndex;
             let mode = source.mode;
             let tableName = 'track_collection_link_temp';
@@ -105,78 +104,75 @@ class FilePathResolve {
                 tablePoint = 'track_contshoot';
                 tablePhoto = 'track_contshoot_photo';
             }
-
-            this.createTable(dirIndex, tableName, tablePoint, tablePhoto);
+            await this.createTable(dirIndex, tableName, tablePoint, tablePhoto);
         }
     }
 
+
     createTable(dirIndex, tableName, tablePoint, tablePhoto) {
-        let sqlPath = this._sourceArr[dirIndex].sqlPath;
-        let db = NewSqlite.getConnect(sqlPath);
-        db.spatialite(function(e1) {
-            if (e1) {
-                logger.error(e1);
-                return;
-            }
-            let sql = `SELECT COUNT(*) flag  FROM sqlite_master where type='table' and name='${tableName}'`;
-            db.all(sql, function (e2, r1) {
-                if (e2) {
-                    logger.error(e2);
-                    return;
+        return new Promise((resolved, reject) => {
+            let sqlPath = this._sourceArr[dirIndex].sqlPath;
+            let db = NewSqlite.getConnect(sqlPath);
+            db.spatialite(function(e1) {
+                if (e1) {
+                    logger.error(e1);
+                    return reject(e1);
                 }
-                if (r1[0].flag > 0) {
-                    logger.info(`表${tableName}已经存在，不需要重复创建`);
-                    return;
-                }
-                sql = `drop table if exists '${tableName}'`;
-                db.all(sql, function (e3, r3) {
-                    if (e3) {
-                        logger.error(e3);
-                        return;
+                let sql = `SELECT COUNT(*) flag  FROM sqlite_master where type='table' and name='${tableName}'`;
+                db.all(sql, function (e2, r1) {
+                    if (e2) {
+                        logger.error(e2);
+                        return reject(e2);
+                    }
+                    if (r1[0].flag > 0) {
+                        logger.info(`表${tableName}已经存在，不需要重复创建`);
+                        return resolved(null);
                     }
                     sql = `create table '${tableName}' (
-                    'id' integer  PRIMARY key autoincrement,
-                    'sNodePid' text not null,
-                    'eNodePid' text not null,
-                    'geometry' GEOMETRY )`;
+                        'id' integer  PRIMARY key autoincrement,
+                        'sNodePid' text not null,
+                        'eNodePid' text not null,
+                        'geometry' GEOMETRY )`;
                     db.all(sql, function (e4, r4) {
                         if (e4) {
                             logger.error(e4);
-                            return;
+                            return reject(e4);
                         }
                         sql = `select a.id, AsGeoJSON(a.geometry) AS geometry, a.recordTime 
-                            from '${tablePoint}' a , '${tablePhoto}' b where a.id = b.id order by a.recordTime `;
+                        from '${tablePoint}' a , '${tablePhoto}' b where a.id = b.id order by a.recordTime `;
                         db.all(sql, function(err, rows) {
                             if (err) {
                                 logger.error(err);
-                                return;
+                                return reject(err);
                             }
                             if (rows.length < 1) {
-                                return;
+                                return resolved(null);
                             }
                             let sqlStr = `insert into '${tableName}' ('sNodePid', 'eNodePid', 'geometry') values `;
                             for (let i = 0; i < rows.length - 1; i++) {
                                 let sId = rows[i].id;
                                 let eId = rows[i + 1].id;
-                                let sDate = rows[i].recordTime.substr(0, 8);
-                                let eDate = rows[i + 1].recordTime.substr(0, 8);
+                                // let sDate = rows[i].recordTime.substr(0, 8);
+                                // let eDate = rows[i + 1].recordTime.substr(0, 8);
                                 let sCoordinates = JSON.parse(rows[i].geometry).coordinates;
                                 let eCoordinates = JSON.parse(rows[i + 1].geometry).coordinates;
                                 let geo = {
                                     type: 'LineString',
                                     coordinates: [sCoordinates, eCoordinates]
                                 };
-                                if (sDate === eDate) {
+                                // if (sDate === eDate) {
                                     geo = JSON.stringify(geo);
                                     sqlStr += ` ('${sId}', '${eId}', GeomFromGeoJSON('${geo}') ), `;
-                                }
+                                // }
                             }
                             sqlStr = sqlStr.substring(0, sqlStr.lastIndexOf(','));
                             db.all(sqlStr, function(er, r) {
                                 if (er) {
                                     logger.error(er);
+                                    return reject(er);
                                 } else {
                                     logger.info('临时道路线表' + tableName + ' 生成成功!');
+                                    return resolved(null);
                                 }
                             });
                         });
